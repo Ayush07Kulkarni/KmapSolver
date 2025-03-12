@@ -245,79 +245,73 @@ public:
 	}
 
 	void minimise() {
+		bool allOnes = true;
+		if (nMin + nDontCare != (1 << nBits)) {
+			allOnes = false;
+		}
+	
+		if (allOnes) {
+			set<int> x;
+			x.insert(-1); // Use -1 to indicate VCC (always true)
+			functions.push_back(x);
+			return;
+		}
+	
 		// prepare primeImp chart
 		vector<vector<bool>> primeImpChart(primeImp.size(), vector<bool>(nMin, false));
-
-		for (int i = 0; i < primeImp.size(); ++i){
-			for (int j = 0; j < nMin; ++j){
+	
+		for (int i = 0; i < primeImp.size(); ++i) {
+			for (int j = 0; j < nMin; ++j) {
 				primeImpChart[i][j] = util.primeIncludes(primeImp[i], minBin[j]);
 			}
 		}
-
 	
-
 		// petric logic
-		vector< set<int> > patLogic;
-		for (int j = 0; j < nMin; ++j){ // column iteration
+		vector<set<int>> patLogic;
+		for (int j = 0; j < nMin; ++j) { // column iteration
 			set<int> x;
-			for (int i = 0; i < primeImp.size(); ++i){ // row iteration
+			for (int i = 0; i < primeImp.size(); ++i) { // row iteration
 				if (primeImpChart[i][j] == true) {
 					x.insert(i);
 				}
 			}
 			patLogic.push_back(x);
 		}
-		for (int i = 0; i < patLogic.size(); ++i){
-			set<int > :: iterator itr;  // convert set to vector
-			for (itr = patLogic[i].begin(); itr != patLogic[i].end(); ++itr){
-				int x = *itr;
-	        	
-	    	}
-	    	
-		}
-
+	
 		// get all possible combinations
-		set< set<int> > posComb;
+		set<set<int>> posComb;
 		set<int> prod;
 		getPosComb(patLogic, 0, prod, posComb); // recursively multiply set elements
 		int min = 9999;
-
-		
-		set< set<int> > :: iterator itr1;
-		for (itr1 = posComb.begin(); itr1 != posComb.end(); ++itr1){
+	
+		set<set<int>>::iterator itr1;
+		for (itr1 = posComb.begin(); itr1 != posComb.end(); ++itr1) {
 			set<int> comb = *itr1;
-			if (comb.size() < min){
+			if (comb.size() < min) {
 				min = comb.size();
 			}
-			set<int > :: iterator itr;  
-			for (itr = comb.begin(); itr != comb.end(); ++itr){
-				int x = *itr;
-	        	
-	    	}
-	    	
 		}
-
-		
-		//Combinations with minimum terms
-		vector< set<int> > minComb;
-		set< set<int> > :: iterator itr;
-		for (itr = posComb.begin(); itr != posComb.end(); ++itr){
+	
+		// Combinations with minimum terms
+		vector<set<int>> minComb;
+		set<set<int>>::iterator itr;
+		for (itr = posComb.begin(); itr != posComb.end(); ++itr) {
 			set<int> comb = *itr;
 			if (comb.size() == min) {
 				minComb.push_back(comb);
 			}
 		}
-
-		//Combinations with minimum variables
+	
+		// Combinations with minimum variables
 		min = 9999;
-		for (int i = 0; i < minComb.size(); ++i){
-			if(util.getVar(minComb[i], primeImp) < min){
+		for (int i = 0; i < minComb.size(); ++i) {
+			if (util.getVar(minComb[i], primeImp) < min) {
 				min = util.getVar(minComb[i], primeImp);
 			}
 		}
-
-		for (int i = 0; i < minComb.size(); ++i){
-			if(util.getVar(minComb[i], primeImp) == min){
+	
+		for (int i = 0; i < minComb.size(); ++i) {
+			if (util.getVar(minComb[i], primeImp) == min) {
 				functions.push_back(minComb[i]);
 			}
 		}
@@ -326,15 +320,22 @@ public:
 	void displayFunctions() {
 		// prints output
 		cout << "\n\nThe possible functions are-\n" << endl;
-		for (int i = 0; i < functions.size(); ++i){
-			set<int> function = functions[i]; 
-			set<int> :: iterator itr;
-			cout << "Function " << i+1 << ":"<< endl;
-			for (itr = function.begin(); itr != function.end(); ++itr){
-				int x = *itr;
-				cout << util.binToString(primeImp[x]) << " + ";
+		for (int i = 0; i < functions.size(); ++i) {
+			set<int> function = functions[i];
+			set<int>::iterator itr;
+			cout << "Function " << i + 1 << ":" << endl;
+			if (function.count(-1)) {
+				cout << "VCC" << endl; // VCC (always true)
+			} else {
+				for (itr = function.begin(); itr != function.end(); ++itr) {
+					int x = *itr;
+					cout << util.binToString(primeImp[x]);
+					if (next(itr) != function.end()) {
+						cout << " + ";
+					}
+				}
+				cout << endl;
 			}
-			
 		}
 	}
 
