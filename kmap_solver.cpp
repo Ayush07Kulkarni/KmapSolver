@@ -190,7 +190,7 @@ public:
         return kmap;
     }
 
-    int printKmap()
+    void printKmap()
     {
         for (const auto& row : getkmap()) 
         {
