@@ -111,117 +111,109 @@ public:
 
 };
 
-class Tabulation : private Util{
-private:
-	Util util;
-	vector< int > minInt; // min terms in decimal
- 	vector< string > minBin; // min terms in binary
-    vector<int> dcInt; // dontcare in decimal
-    vector<string> dcBin; // dont care in binary
- 	int nBits; // no of variables
- 	int nMin;  // no of minterms
-    int nDontCare; // no of dont care condition
- 	vector< vector< string> > table; 
- 	vector< string > primeImp;
- 	vector< set<int> > functions;
-
-     map<int,int> codeConverter = {
-        {0, 0},
-        {1, 1},
-        {2, 3},
-        {3, 2},
-        {4, 4},
-        {5, 5},
-        {6, 7},
-        {7, 6},
-        {8, 12},
-        {9, 13},
-        {10, 15},
-        {11, 14},
-        {12, 8},
-        {13, 9},
-        {14, 11},
-        {15, 10}
-    };
+class Tabulation : private Util {
+	private:
+		Util util;
+		vector<int> minInt; // min terms in decimal
+		vector<string> minBin; // min terms in binary
+		vector<int> dcInt; // dontcare in decimal
+		vector<string> dcBin; // dont care in binary
+		int nBits; // no of variables
+		int nMin;  // no of minterms
+		int nDontCare; // no of dont care condition
+		vector<vector<string>> table;
+		vector<string> primeImp;
+		vector<set<int>> functions;
+	
+		map<int, int> codeConverter = {
+			{0, 0}, {1, 1}, {2, 3}, {3, 2}, {4, 4}, {5, 5}, {6, 7}, {7, 6},
+			{8, 12}, {9, 13}, {10, 15}, {11, 14}, {12, 8}, {13, 9}, {14, 11}, {15, 10},
+			{16, 16}, {17, 17}, {18, 19}, {19, 18}, {20, 20}, {21, 21}, {22, 23}, {23, 22},
+			{24, 28}, {25, 29}, {26, 31}, {27, 30}, {28, 24}, {29, 25}, {30, 27}, {31, 26},
+			{32, 32}, {33, 33}, {34, 35}, {35, 34}, {36, 36}, {37, 37}, {38, 39}, {39, 38},
+			{40, 44}, {41, 45}, {42, 47}, {43, 46}, {44, 40}, {45, 41}, {46, 43}, {47, 42},
+			{48, 48}, {49, 49}, {50, 51}, {51, 50}, {52, 52}, {53, 53}, {54, 55}, {55, 54},
+			{56, 60}, {57, 61}, {58, 63}, {59, 62}, {60, 56}, {61, 57}, {62, 59}, {63, 58}
+		};
  	
  
 
-public:
+		public:
+		vector<int> getGrayCode() {
+			vector<int> graycodes;
+			for (int i : minInt) {
+				graycodes.push_back(codeConverter[i]);
+			}
+			for (int i : dcInt) {
+				graycodes.push_back(codeConverter[i]);
+			}
+			return graycodes;
+		}
+	
+		vector<vector<int>> getkmap() {
+			int rows, cols;
+			if (nBits == 2) {
+				rows = 2;
+				cols = 2;
+			} else if (nBits == 3) {
+				rows = 2;
+				cols = 4;
+			} else if (nBits == 4) {
+				rows = 4;
+				cols = 4;
+			} else if (nBits == 5) {
+				rows = 4;
+				cols = 8;
+			} else if (nBits == 6) {
+				rows = 8;
+				cols = 8;
+			} else {
+				throw invalid_argument("K-map supports up to 6 variables only.");
+			}
+	
+			vector<vector<int>> kmap(rows, vector<int>(cols, 0));
+			for (int code : getGrayCode()) {
+				int row = code / cols;
+				int col = code % cols;
+				kmap[row][col] = 1;
+			}
+	
+			return kmap;
+		}
 
-    vector<int> getGrayCode() 
-    {
-        vector<int> graycodes;
-        for (int i : minInt) 
-        {
-            graycodes.push_back(codeConverter[i]);
-        }
-        for (int i: dcInt)
-        {
-            graycodes.push_back(codeConverter[i]);
-        }
-        return graycodes;
-    }
-
-    vector<vector<int>> getkmap()
-    {
-        int rows,cols;
-        if( nBits == 2)
-        {
-            rows = 2;
-            cols =2;
-        }
-        else if(nBits == 3)
-        {
-            rows = 2;
-            cols = 4;
-        }
-        else if (nBits == 4)
-        {
-            rows = 4;
-            cols = 4;
-        }
-        vector<vector<int>> kmap(rows, vector<int>(cols ,0));
-        for( int code : getGrayCode())
-        {
-            int col = code/nBits;
-            kmap[col][code%nBits] = 1;
-        }
-        
-        return kmap;
-    }
-
-    void printKmap()
-    {
-        for (const auto& row : getkmap()) 
-        {
-        for (int elem : row) 
-        {
-            std::cout << elem << " ";
-        }
-        std::cout << std::endl;
-        }
-    }
-
-
-	void initialise(int bits, int minCount, const vector<int> &minTerms, int dontCareCount, const vector<int> &dontCareTerms) {
-    	nBits = bits;
-    	nMin = minCount;
-    	nDontCare = dontCareCount;
-
-    	minInt = minTerms;
-    	for (int i = 0; i < nMin; ++i) {
-        	minBin.push_back(util.intToBinString(nBits, minInt[i]));
-    	}
-
-    	dcInt = dontCareTerms;
-    	for (int i = 0; i < nDontCare; ++i) 
-		{
-        	dcBin.push_back(util.intToBinString(nBits, dcInt[i]));
-    	}
-
-    	// Initialize the table
-    	table = vector<vector<string>>(nBits + 1);
-	}
+		void initialise(int bits, int minCount, const vector<int> &minTerms, int dontCareCount, const vector<int> &dontCareTerms) {
+			nBits = bits;
+			nMin = minCount;
+			nDontCare = dontCareCount;
+	
+			minInt = minTerms;
+			for (int i = 0; i < nMin; ++i) {
+				minBin.push_back(util.intToBinString(nBits, minInt[i]));
+			}
+	
+			dcInt = dontCareTerms;
+			for (int i = 0; i < nDontCare; ++i) 
+			{
+				dcBin.push_back(util.intToBinString(nBits, dcInt[i]));
+			}
+	
+			// Initialize the table
+			table = vector<vector<string>>(nBits + 1);
+		}
+	
+		void printKmap() {
+			try {
+				for (const auto& row : getkmap()) {
+					for (int elem : row) {
+						cout << elem << " ";
+					}
+					cout << endl;
+				}
+			} catch (const invalid_argument& e) {
+				cerr << e.what() << endl;
+			}
+		}
+	
 
 
 	void setPrimeImp() {
