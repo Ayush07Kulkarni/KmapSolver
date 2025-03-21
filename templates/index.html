@@ -16,9 +16,15 @@
         <form action="/" method="post">
             <label for="nBits">Number of Variables:</label>
             <input type="number" id="nBits" name="nBits" min="1" max="6" required>
-
-            <label for="minTerms">Enter Minterms (space-separated):</label>
-            <textarea id="minTerms" name="minTerms" required></textarea>
+            
+            <label for="mode">Select Mode:</label>
+            <select id="mode" name="mode" required onchange="toggleInput()">
+                <option value="sop">SOP (Sum of Products)</option>
+                <option value="pos">POS (Product of Sums)</option>
+            </select>
+            
+            <label id="termsLabel" for="terms">Enter Minterms (space-separated):</label>
+            <textarea id="terms" name="terms" required></textarea>
 
             <label for="dontCare">Enter Don't Care Terms (space-separated, optional):</label>
             <textarea id="dontCare" name="dontCare"></textarea>
@@ -27,20 +33,27 @@
         </form>
 
         {% if output %}
-        <h2>Output K-map:</h2>
-        <div class="output-container">
-            <table class="animated-table">
-                <tbody>
-                    {% for row in output.strip().split('\n') %}
-                    <tr>
-                        {% for cell in row.split() %}
-                        <td>{{ cell }}</td>
+            <h2>Output K-map:</h2>
+            <div class="output-container">
+                <table class="styled-table">
+                    <tbody>
+                        {% for row in output.kmap_rows %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
+
+            {% if output.function_output %}
+                <h2>Minimized Function:</h2>
+                {% for sentence in output.function_output %}
+                    <p>{{ sentence }}</p>
+                {% endfor %}
+            {% endif %}
         {% endif %}
     </div>
 
@@ -48,5 +61,17 @@
         <p>© 2025 Boolean Minimization | Designed with ❤️</p>
     </footer>
 
+    <script>
+        function toggleInput() {
+            let mode = document.getElementById("mode").value;
+            let label = document.getElementById("termsLabel");
+            
+            if (mode === "sop") {
+                label.textContent = "Enter Minterms (space-separated):";
+            } else {
+                label.textContent = "Enter Maxterms (space-separated):";
+            }
+        }
+    </script>
 </body>
 </html>
