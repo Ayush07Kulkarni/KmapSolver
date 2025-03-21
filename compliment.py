@@ -19,5 +19,3 @@ def compliment_string(s):
 
     return ' * '.join(complemented_terms)
 
-string = "a'b + abc'def"
-print(compliment_string(string))
