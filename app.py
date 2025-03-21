@@ -24,9 +24,9 @@ def index():
         subprocess.run(['g++', 'kmap_solver.cpp', '-o', 'kmap_solver'], check=True)
         result = subprocess.run(['./kmap_solver'], input=input_data, text=True, capture_output=True, check=True)
     
-        if isSop == "SOP":
+        if isSop == "Sum of Products":
             output = result.stdout
-        else:
+        elif isSop == "Product of Sums":
             output = compliment_string(result.stdout)
     except subprocess.CalledProcessError as e:
             # Capture both stdout and stderr
