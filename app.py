@@ -26,9 +26,15 @@ def minimize_boolean_function(nBits, mode, terms, dontCare):
         function_start = False
 
         for line in output_lines:
-            if "0 " in line or "1 " in line:
+            if "0 " in line or "1 " in line or "x " in line:
                 kmap_start = True
-                kmap_rows.append([int(x) for x in line.split()])
+                row_data = []
+                for cell in line.split():
+                    if cell == 'x':
+                        row_data.append('<span class="dont-care-sop">×</span>')
+                    else:
+                        row_data.append(cell)
+                kmap_rows.append(row_data)
             elif kmap_start:
                 kmap_start = False
                 function_start = True
@@ -44,7 +50,13 @@ def minimize_boolean_function(nBits, mode, terms, dontCare):
         # Python compliment string function for POS
         terms = terms.replace(",", "+")
         result = compliment_string(terms)
-        return {'kmap_rows': [], 'function_output': [result]}
+        kmap_rows = []
+        #This section needs to be written to handle pos kmap output, and the dont cares.
+        #example:
+        #kmap_rows = [["0","1","<span class='dont-care-pos'>×</span>","1"],["1","0","0","1"]]
+        #Placeholder example:
+        kmap_rows = [["0","1","<span class='dont-care-pos'>×</span>","1"],["1","0","0","1"]]
+        return {'kmap_rows': kmap_rows, 'function_output': [result]}
 
 def compliment_string(s):
     elements = s.split("+")
