@@ -40,13 +40,12 @@
                         {% for row in output.kmap_rows %}
                             <tr>
                                 {% for cell in row %}
-                                    <td>{{ cell|safe }}</td>
+                                    <td>{{ cell }}</td>
                                 {% endfor %}
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <p class="legend">Legend: <span class="dont-care-sop">×</span> = Don't Care (1 for SOP, 0 for POS)</p>
             </div>
 
             {% if output.function_output %}
